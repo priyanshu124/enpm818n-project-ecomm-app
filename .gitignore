@@ -1,0 +1,23 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfvars.json
+.terraformrc
+crash.log
+override.tf
+override_*.tf
+*_override.tf
+
+# Git
+.git/
+
+# Docker
+.dockerignore
+Dockerfile.bak
+*.log
+tmp/
+.env
+.env.*
