@@ -1,5 +1,5 @@
 variable "prefix" {
-  default = "enpm818n-"
+  default = "enpm818n"
 }
 
 variable "project" {
