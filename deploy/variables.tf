@@ -29,3 +29,9 @@ variable "db_username" {
 variable "db_password" {
   description = "Password for the Terraform database"
 }
+
+variable "domain" {
+  description = "Domain name"
+  default     = "enpm818n-ecommerce.com"
+}
+
