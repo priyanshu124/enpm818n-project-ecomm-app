@@ -1,9 +1,5 @@
 # Create Route53 hosted zone and ACM certificate (DNS validated) for the provided domain
 
-data "aws_route53_zone" "zone" {
-  name = "${var.domain}."
-}
-
 #  Hosted zone that will be used to validate the ACM certificate and manage app DNS
 resource "aws_route53_zone" "zone" {
   name = var.domain
@@ -12,20 +8,20 @@ resource "aws_route53_zone" "zone" {
 
 # Create the DNS validation records
 resource "aws_acm_certificate" "ssl" {
-  domain_name               = var.domain
-  validation_method         = "DNS"
+  domain_name       = var.domain
+  validation_method = "DNS"
 }
 
 resource "aws_route53_record" "cert_validation" {
   for_each = {
     for dvo in aws_acm_certificate.ssl.domain_validation_options : dvo.domain_name => {
-      name  = dvo.resource_record_name
-      type  = dvo.resource_record_type
+      name   = dvo.resource_record_name
+      type   = dvo.resource_record_type
       record = dvo.resource_record_value
     }
   }
 
-  zone_id = data.aws_route53_zone.zone.zone_id
+  zone_id = aws_route53_zone.zone.zone_id
   name    = each.value.name
   type    = each.value.type
   ttl     = 60

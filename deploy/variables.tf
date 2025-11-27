@@ -35,3 +35,25 @@ variable "domain" {
   default     = "enpm818n-ecommerce.com"
 }
 
+variable "ssh_key_name" {
+  default     = "enpm818n-ec2-ssh-key"
+  description = "Name of the SSH key pair for EC2 access"
+}
+
+variable "min_size" {
+  description = "ASG min instances"
+  type        = number
+  default     = 1
+}
+
+variable "desired_capacity" {
+  description = "ASG desired instances"
+  type        = number
+  default     = 1
+}
+
+variable "max_size" {
+  description = "ASG max instances"
+  type        = number
+  default     = 3
+}

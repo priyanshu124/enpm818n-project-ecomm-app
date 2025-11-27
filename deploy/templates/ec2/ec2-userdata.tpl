@@ -5,7 +5,7 @@
 set -xe
 
 # write ECS cluster name into ecs config (ECS agent will register this instance)
-echo "ECS_CLUSTER=${var.prefix}-ecs-cluster" > /etc/ecs/ecs.config
+echo "ECS_CLUSTER=${ecs_cluster_name}" > /etc/ecs/ecs.config
 
 # install stress-ng and ensure ecs agent on Amazon Linux 2
 yum update -y

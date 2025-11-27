@@ -5,7 +5,7 @@
 resource "aws_iam_role" "ec2_role" {
   # Role attached to EC2 instances so they can run ECS agent and perform actions
   name               = "${var.prefix}-ec2-role"
-  assume_role_policy = file("./templates/ecs/ec2-assume-role-policy.json")
+  assume_role_policy = file("./templates/ec2/ec2-assume-role-policy.json")
   tags = merge(
     local.common_tags,
     { "Name" = "${local.prefix}-main" }
@@ -21,8 +21,8 @@ resource "aws_iam_role_policy_attachment" "ecs_managed" {
 
 # Inline policy giving EC2 permissions to pull images, read secrets, write logs, and read S3 static assets
 resource "aws_iam_role_policy" "ec2_extra" {
-  name = "${var.prefix}-ec2-extra"
-  role = aws_iam_role.ec2_role.id
+  name   = "${var.prefix}-ec2-extra"
+  role   = aws_iam_role.ec2_role.id
   policy = file("./templates/ec2/ec2-extra-policy.json")
 }
 
