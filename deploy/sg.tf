@@ -1,5 +1,5 @@
 # ALB SG
-resource "aws_security_group" "alb_sg" {
+resource "aws_security_group" "alb" {
   name   = "${var.prefix}-alb-sg"
   vpc_id = aws_vpc.main.id
   description = "ALB security group"
@@ -21,11 +21,14 @@ resource "aws_security_group" "alb_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = { Name = "${var.prefix}-alb-sg" }
+  tags = merge(
+    local.common_tags,
+    { "Name" = "${var.prefix}-alb-sg" }
+  )
 }
 
 # EC2 (ECS container instances) SG
-resource "aws_security_group" "ecs_sg" {
+resource "aws_security_group" "ecs" {
   name   = "${var.prefix}-ecs-sg"
   vpc_id = aws_vpc.main.id
   description = "ECS EC2 instances security group"
@@ -33,7 +36,7 @@ resource "aws_security_group" "ecs_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    security_groups = [aws_security_group.alb_sg.id]
+    security_groups = [aws_security_group.alb.id]
   }
   ingress {
     from_port   = 22
@@ -47,11 +50,14 @@ resource "aws_security_group" "ecs_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = { Name = "${var.prefix}-ecs-sg" }
+  tags = merge(
+    local.common_tags,
+    { "Name" = "${var.prefix}-ecs-sg" }
+  )
 }
 
 # RDS SG
-resource "aws_security_group" "rds_sg" {
+resource "aws_security_group" "rds" {
   name   = "${var.prefix}-rds-sg"
   vpc_id = aws_vpc.main.id
   description = "RDS security group"
@@ -59,7 +65,7 @@ resource "aws_security_group" "rds_sg" {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    security_groups = [aws_security_group.ecs_sg.id]
+    security_groups = [aws_security_group.ecs.id]
   }
   egress {
     from_port   = 0
@@ -67,5 +73,8 @@ resource "aws_security_group" "rds_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = { Name = "${var.prefix}-rds-sg" }
+  tags = merge(
+    local.common_tags,
+    { "Name" = "${var.prefix}-rds-sg" }
+  )
 }
