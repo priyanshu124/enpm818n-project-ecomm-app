@@ -1,5 +1,9 @@
 # Create Route53 hosted zone and ACM certificate (DNS validated) for the provided domain
 
+data "aws_route53_zone" "zone" {
+  name = "${var.domain}."
+}
+
 #  Hosted zone that will be used to validate the ACM certificate and manage app DNS
 resource "aws_route53_zone" "zone" {
   name = var.domain
