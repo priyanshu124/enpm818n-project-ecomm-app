@@ -3,7 +3,7 @@ variable "prefix" {
 }
 
 variable "project" {
-  default = "ecoomerce-app"
+  default = "ecommerce-app"
 }
 
 variable "contact" {
@@ -18,4 +18,14 @@ variable "region" {
 variable "instance_type" {
   description = "EC2 instance type for ECS container instances"
   default     = "t2.micro"
+}
+
+
+variable "db_username" {
+  description = "Username for the recipe app api database"
+  default     = "ecomm-app-user"
+}
+
+variable "db_password" {
+  description = "Password for the Terraform database"
 }
