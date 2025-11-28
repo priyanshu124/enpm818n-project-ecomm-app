@@ -26,8 +26,13 @@ variable "db_username" {
   default     = "ecomm-app-user"
 }
 
+variable "db_name" {
+  description = "database name for ecommerce app"
+  default     = "ecommerce_1"
+}
+
 variable "db_password" {
-  description = "Password for the Terraform database"
+  description = "Password for the ecommerce app database"
 }
 
 variable "domain" {
@@ -56,4 +61,9 @@ variable "max_size" {
   description = "ASG max instances"
   type        = number
   default     = 3
+}
+
+variable ecr_repo_url {
+  description = "ECR repository URL for the ecommerce app"
+  default = "245838289780.dkr.ecr.us-east-1.amazonaws.com/enpm818n/ecommerce-app"
 }
