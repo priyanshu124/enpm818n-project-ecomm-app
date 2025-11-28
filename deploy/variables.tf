@@ -3,7 +3,7 @@ variable "prefix" {
 }
 
 variable "project" {
-  default = "ecommerce-app"
+  default = "ecomm-app"
 }
 
 variable "contact" {
@@ -17,13 +17,13 @@ variable "region" {
 
 variable "instance_type" {
   description = "EC2 instance type for ECS container instances"
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 
 variable "db_username" {
   description = "Username for the recipe app api database"
-  default     = "ecomm-app-user"
+  default     = "appuser"
 }
 
 variable "db_name" {

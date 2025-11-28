@@ -11,6 +11,14 @@ resource "aws_ecs_cluster" "cluster" {
   )
 }
 
+resource "aws_cloudwatch_log_group" "ecs" {
+  name              = "/ecs/${var.prefix}"
+  tags = merge(
+    local.common_tags,
+    { "Name" = "${local.prefix}-ecs-cluster" }
+  )
+}
+
 # ECS task definition and ECS service (EC2 launch type) registering with ALB target group
 
 # ECR authorization token is used by ECS/hosts to pull images
@@ -33,11 +41,12 @@ resource "aws_ecs_task_definition" "app_task" {
     cpu          = 256
     memory       = 512
     essential    = true
-    portMappings = [{ containerPort = 80, hostPort = 0 }]
+    portMappings = [{ containerPort = 80, hostPort = 80}]
     environment = [
       { name = "DB_HOST", value = aws_db_instance.main.address },
       { name = "DB_USER", value = var.db_username },
-      { name = "DB_NAME", value = var.db_name }
+      { name = "DB_NAME", value = var.db_name },
+      { name = "DB_PASSWORD", value = var.db_password }
       # DB password should be loaded securely via Secrets Manager in production
     ]
     logConfiguration = {
@@ -54,7 +63,7 @@ resource "aws_ecs_task_definition" "app_task" {
 # ECS Service to keep desired count of tasks running and register with ALB
 resource "aws_ecs_service" "app_service" {
   # Service maintains tasks and integrates with ALB for load balancing
-  name            = "${var.prefix}-appservice"
+  name            = "${var.prefix}-app-service"
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.app_task.arn
   desired_count   = 1

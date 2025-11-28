@@ -37,7 +37,7 @@ resource "aws_db_instance" "main" {
   storage_type               = "gp2"
   engine                     = "mysql"
   engine_version             = "8.0"
-  instance_class             = "db.t2.micro"
+  instance_class             = "db.t3.micro"
   db_subnet_group_name       = aws_db_subnet_group.main.name
   password                   = var.db_password
   username                   = var.db_username
@@ -56,4 +56,15 @@ resource "aws_db_instance" "main" {
     { "Name" = "${local.prefix}-main" }
   )
 }
+
+
+# # Store DB password securely in AWS Secrets Manager
+# resource "aws_secretsmanager_secret" "db_password" {
+#   name = "${var.prefix}-db-password"
+# }
+
+# resource "aws_secretsmanager_secret_version" "db_password_value" {
+#   secret_id     = aws_secretsmanager_secret.db_password.id
+#   secret_string = var.db_password  # stored securely, not exposed in logs
+# }
 
