@@ -37,7 +37,7 @@ variable "db_password" {
 
 variable "domain" {
   description = "Domain name"
-  default     = "enpm818n-ecommerce.com"
+  default     = "enpm818n-ecomm-app.xyz"
 }
 
 variable "ssh_key_name" {

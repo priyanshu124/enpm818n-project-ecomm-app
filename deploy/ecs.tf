@@ -24,8 +24,8 @@ resource "aws_ecs_task_definition" "app_task" {
   requires_compatibilities = ["EC2"]
   cpu                      = "256"
   memory                   = "512"
-  task_role_arn            = aws_iam_role.ec2_role.arn
-  execution_role_arn       = aws_iam_role.ec2_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
 
   container_definitions = jsonencode([{
     name         = "ecommerce-app"
