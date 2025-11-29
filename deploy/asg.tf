@@ -1,56 +1,38 @@
-# Find recent ECS-optimized Amazon Linux 2 AMI
-data "aws_ami" "ecs_ami" {
+data "aws_ami" "php-app" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = ["self"] # Only pick AMIs in your AWS account
+
   filter {
     name   = "name"
-    values = ["amzn2-ami-ecs-hvm-*"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-  name   = "virtualization-type"
-  values = ["hvm"]
+    values = ["php-app-*"] # Matches Packer-built AMIs
   }
 }
 
-# Render user-data template for EC2 instances
-data "template_file" "user_data" {
-  template = file("./templates/ec2/ec2-userdata.tpl")
-  vars = {
-    ecs_cluster_name = aws_ecs_cluster.cluster.name
-  }
-}
-
-# Launch template used by ASG to launch ECS-optimized EC2 instances
+# Launch template used by ASG to launch EC2 instances
 resource "aws_launch_template" "lt" {
-  # Launch template with IAM instance profile and security group so EC2 can run ECS tasks and pull images
+  # Launch template with IAM instance profile and security group for EC2 instances
   name_prefix   = "${var.prefix}-lt-"
-  image_id      = data.aws_ami.ecs_ami.id
+  image_id      = data.aws_ami.php-app.id
   instance_type = var.instance_type
   iam_instance_profile { name = aws_iam_instance_profile.ec2_profile.name }
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.ecs.id]
+    security_groups             = [aws_security_group.ec2.id]
   }
-  key_name  = var.ssh_key_name
-  user_data = base64encode(data.template_file.user_data.rendered)
+  key_name = var.ssh_key_name
+  #user_data = base64encode(data.template_file.user_data.rendered)
   tag_specifications {
     resource_type = "instance"
     tags = merge(
       local.common_tags,
-      { "Name" = "${local.prefix}-ec2-launch-template" }
+      { "Name" = "${local.prefix}-app-launch-template" }
     )
   }
 }
 
-# Auto Scaling Group to maintain the desired number of ECS container hosts
+# Auto Scaling Group to maintain the desired number of EC2 instances
 resource "aws_autoscaling_group" "asg" {
-  # Manages EC2 capacity for ECS cluster; scales between min/max/desired
+  # Manages EC2 capacity; scales between min/max/desired
   name             = "${var.prefix}-asg"
   min_size         = var.min_size
   max_size         = var.max_size
@@ -59,13 +41,32 @@ resource "aws_autoscaling_group" "asg" {
     id      = aws_launch_template.lt.id
     version = "$Latest"
   }
+
+  #triggers rolling replacement when LT changes
+  instance_refresh {
+    strategy = "Rolling"
+
+    preferences {
+      min_healthy_percentage = 50
+    }
+
+    # Trigger a refresh when launch template changes (new AMI)
+    triggers = ["launch_template"]
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
   vpc_zone_identifier = [aws_subnet.public_a.id, aws_subnet.public_b.id]
   health_check_type   = "EC2"
-  target_group_arns   = [aws_lb_target_group.app.arn]
+
+  # attach to a target group so that instances are behind a load balancer
+  target_group_arns = [aws_lb_target_group.app.arn]
+
   tag {
     key                 = "Name"
-    value               = "${var.prefix}-ecs-instance"
+    value               = "${var.prefix}-app-instance"
     propagate_at_launch = true
   }
-  depends_on = [aws_ecs_cluster.cluster]
+
 }

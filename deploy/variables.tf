@@ -63,7 +63,7 @@ variable "max_size" {
   default     = 3
 }
 
-variable ecr_repo_url {
+variable "ecr_repo_url" {
   description = "ECR repository URL for the ecommerce app"
-  default = "245838289780.dkr.ecr.us-east-1.amazonaws.com/enpm818n/ecommerce-app"
+  default     = "245838289780.dkr.ecr.us-east-1.amazonaws.com/enpm818n/ecommerce-app"
 }
