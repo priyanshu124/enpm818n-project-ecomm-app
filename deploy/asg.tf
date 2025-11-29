@@ -16,7 +16,7 @@ resource "aws_launch_template" "lt" {
   instance_type = var.instance_type
   iam_instance_profile { name = aws_iam_instance_profile.ec2_profile.name }
   network_interfaces {
-    associate_public_ip_address = true
+    associate_public_ip_address = false
     security_groups             = [aws_security_group.ec2.id]
   }
   key_name = var.ssh_key_name
@@ -57,8 +57,8 @@ resource "aws_autoscaling_group" "asg" {
   lifecycle {
     create_before_destroy = true
   }
-  vpc_zone_identifier = [aws_subnet.public_a.id, aws_subnet.public_b.id]
-  health_check_type   = "EC2"
+  vpc_zone_identifier = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+  health_check_type   = "ELB"
 
   # attach to a target group so that instances are behind a load balancer
   target_group_arns = [aws_lb_target_group.app.arn]

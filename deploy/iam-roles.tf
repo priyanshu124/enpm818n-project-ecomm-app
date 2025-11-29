@@ -20,8 +20,13 @@ resource "aws_iam_role" "ec2_instance_role" {
 resource "aws_iam_role_policy" "ec2_role_policy" {
   name   = "${var.prefix}-ec2_role_policy"
   role   = aws_iam_role.ec2_instance_role.id
-  policy = file("./templates/ecs/ecs-task-role.json")
+  policy = file("./templates/ec2/ec2-role.json")
   depends_on = [aws_iam_role.ec2_instance_role]
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_ssm_core" {
+  role       = aws_iam_role.ec2_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 # Instance profile for EC2 to attach the role

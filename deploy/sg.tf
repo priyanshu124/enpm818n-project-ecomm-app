@@ -29,7 +29,7 @@ resource "aws_security_group" "alb" {
 
 # EC2  SG
 resource "aws_security_group" "ec2" {
-  name        = "${var.prefix}-ecs-sg"
+  name        = "${var.prefix}-ec2-sg"
   vpc_id      = aws_vpc.main.id
   description = "ECS EC2 instances security group"
   ingress {
@@ -38,12 +38,13 @@ resource "aws_security_group" "ec2" {
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # Remote SSH access - commented out for security reasons
+  # ingress {
+  #   from_port   = 22
+  #   to_port     = 22
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
   egress {
     from_port   = 0
     to_port     = 0
@@ -52,7 +53,7 @@ resource "aws_security_group" "ec2" {
   }
   tags = merge(
     local.common_tags,
-    { "Name" = "${var.prefix}-ecs-sg" }
+    { "Name" = "${var.prefix}-ec2-sg" }
   )
 }
 
