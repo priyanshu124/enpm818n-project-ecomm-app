@@ -27,8 +27,8 @@ resource "aws_security_group" "alb" {
   )
 }
 
-# EC2 (ECS container instances) SG
-resource "aws_security_group" "ecs" {
+# EC2  SG
+resource "aws_security_group" "ec2" {
   name        = "${var.prefix}-ecs-sg"
   vpc_id      = aws_vpc.main.id
   description = "ECS EC2 instances security group"
@@ -65,7 +65,7 @@ resource "aws_security_group" "rds" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs.id]
+    security_groups = [aws_security_group.ec2.id]
   }
   egress {
     from_port   = 0

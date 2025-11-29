@@ -1,6 +1,6 @@
 # Application Load Balancer, target group, HTTPS listener using ACM certificate, and basic WAF
 
-# ALB to distribute HTTP/HTTPS traffic to ECS instances
+# ALB to distribute HTTP/HTTPS traffic to EC2 instances
 resource "aws_lb" "alb" {
   name               = "${var.prefix}-alb"
   load_balancer_type = "application"
@@ -13,16 +13,19 @@ resource "aws_lb" "alb" {
 }
 
 
-# Target group for app (ECS tasks registered as instance targets)
+# Target group for app (EC2 instances)
 resource "aws_lb_target_group" "app" {
   name     = "${var.prefix}-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
+
+  target_type = "instance"
   health_check {
     path    = "/"
     matcher = "200-399"
   }
+
   tags = merge(
     local.common_tags,
     { "Name" = "${local.prefix}-alb-tg" }
