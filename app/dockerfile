@@ -1,20 +1,21 @@
 # Use official PHP + Apache image
 FROM php:8.2-apache
 
-# Install PHP extensions required for MySQL and general functionality
+# Install required libs + PHP MySQL extensions
 RUN apt-get update && apt-get install -y \
-    unzip \
-    libzip-dev \
-    zip \
-    && docker-php-ext-install mysqli pdo pdo_mysql zip
+    curl \
+    libssl-dev \
+    && docker-php-ext-install mysqli pdo pdo_mysql
 
-# Enable Apache mod_rewrite for pretty URLs (if needed)
-RUN a2enmod rewrite
+# Download AWS RDS CA bundle for secure MySQL SSL
+RUN mkdir -p /opt/rds-ca \
+    && curl -o /opt/rds-ca/global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
+    && chmod 644 /opt/rds-ca/global-bundle.pem
 
-# Copy application source code into Apache web root
+# Copy application code
 COPY . /var/www/html/
 
-# Ensure proper permissions
+# Permissions
 RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
 # Expose port 80
