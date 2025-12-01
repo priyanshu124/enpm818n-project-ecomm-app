@@ -27,6 +27,7 @@ jobs:
   packer-check:
     name: Packer Validate
     runs-on: ubuntu-22.04
+    needs: terraform-lint
 
     steps:
       - name: Checkout
@@ -38,7 +39,7 @@ jobs:
       - name: Validate Packer
         run: |
           cd packer/
-          packer validate template.pkr.hcl
+          packer validate php-app.pkr.hcl
 
 
   packer-build:
@@ -68,7 +69,7 @@ jobs:
         id: build
         run: |
           cd packer/
-          AMI_ID=$(packer build -machine-readable template.pkr.hcl | \
+          AMI_ID=$(packer build -machine-readable php-app.pkr.hcl | \
             awk -F, '$3 == "artifact" && $4 == "id" {print $6}' | cut -d ':' -f2)
           echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
 
