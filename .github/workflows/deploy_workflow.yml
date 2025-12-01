@@ -83,20 +83,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+      - name: Set workspace
+        run: |
+          if [[ $GITHUB_REF == 'refs/heads/prod' ]]; then
+            echo "prod" > .workspace
+          else
+            echo "dev" > .workspace
+          fi
 
       - name: Terraform Apply
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          TF_VAR_ami_id: ${{ needs.packer-build.outputs.ami_id }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
         run: |
           cd deploy/
-
-          export TF_VAR_ami_id="${{ needs.packer-build.outputs.ami_id }}"
-          export TF_VAR_db_password="${{ secrets.TF_VAR_DB_PASSWORD }}"
+          export TF_WORKSPACE="$workspace"
 
           docker compose run --rm terraform init
+          docker compose run --rm terraform workspace select -or-create "$workspace"
           docker compose run --rm terraform plan
           docker compose run --rm terraform apply -auto-approve
