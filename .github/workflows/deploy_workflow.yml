@@ -96,11 +96,11 @@ jobs:
 
       - name: Terraform Apply
         env:
-          AWS_ACCESS_KEY_ID: ${{ vaRS.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: us-east-1
-        TF_VAR_ami_id: ${{ needs.packer-build.outputs.ami_id }}
-        TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          TF_VAR_ami_id: ${{ needs.packer-build.outputs.ami_id }}
+          TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }
         run: |
           cd deploy/
           export TF_WORKSPACE="$workspace"
