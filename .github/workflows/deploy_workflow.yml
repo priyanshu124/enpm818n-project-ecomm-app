@@ -1,0 +1,102 @@
+name: Lint, Build, and Deploy Infra
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+
+  terraform-lint:
+    name: Terraform Lint
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Terraform lint
+        run: |
+          cd deploy/
+          docker compose run --rm terraform init -backend=false
+          docker compose run --rm terraform validate
+          docker compose run --rm terraform fmt -check
+
+
+  packer-check:
+    name: Packer Validate
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+
+      - name: Validate Packer
+        run: |
+          cd packer/
+          packer validate template.pkr.hcl
+
+
+  packer-build:
+    name: Build AMI (Only on Push)
+    runs-on: ubuntu-22.04
+    needs: packer-check
+    if: github.event_name == 'push'
+
+    outputs:
+      ami_id: ${{ steps.build.outputs.ami_id }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ variables.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+
+      - name: Build AMI
+        id: build
+        run: |
+          cd packer/
+          AMI_ID=$(packer build -machine-readable template.pkr.hcl | \
+            awk -F, '$3 == "artifact" && $4 == "id" {print $6}' | cut -d ':' -f2)
+          echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
+
+
+  terraform-apply:
+    name: Terraform Apply (Only on Push)
+    runs-on: ubuntu-22.04
+    needs: packer-build
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ variables.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Terraform Apply
+        run: |
+          cd deploy/
+
+          export TF_VAR_ami_id="${{ needs.packer-build.outputs.ami_id }}"
+          export TF_VAR_db_password="${{ secrets.TF_VAR_DB_PASSWORD }}"
+
+          docker compose run --rm terraform init
+          docker compose run --rm terraform plan
+          docker compose run --rm terraform apply -auto-approve
