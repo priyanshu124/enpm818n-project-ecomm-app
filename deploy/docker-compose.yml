@@ -1,4 +1,4 @@
-services:
+serviches:
   terraform:
     image: hashicorp/terraform:1.6.2
     volumes:
@@ -10,3 +10,5 @@ services:
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - AWS_DEFAULT_REGION=us-east-1
       - TF_WORKSPACE=${TF_WORKSPACE}
+      - TF_VAR_ami_id=${TF_VAR_ami_id}
+      - TF_VAR_db_password=${TF_VAR_db_password}
