@@ -39,6 +39,7 @@ jobs:
       - name: Validate Packer
         run: |
           cd packer/
+          packer init php-app.pkr.hcl
           packer validate php-app.pkr.hcl
 
 
