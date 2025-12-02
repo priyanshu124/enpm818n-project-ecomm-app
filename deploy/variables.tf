@@ -67,3 +67,22 @@ variable "ecr_repo_url" {
   description = "ECR repository URL for the ecommerce app"
   default     = "245838289780.dkr.ecr.us-east-1.amazonaws.com/enpm818n/ecommerce-app"
 }
+
+variable "cloudfront_price_class" {
+  description = "CloudFront price class"
+  type        = string
+  default     = "PriceClass_100" 
+}
+
+variable "cloudfront_aliases" {
+  description = "Optional domain names (CNAMEs) for CloudFront"
+  type        = list(string)
+  default     = ["assests.enpm818n-ecomm-app.xyz"]
+}
+
+
+variable "static_bucket_name" {
+  description = "Globally unique S3 bucket name for static assets"
+  type        = string
+  default     = "enpm818n-ecom-s3"
+}

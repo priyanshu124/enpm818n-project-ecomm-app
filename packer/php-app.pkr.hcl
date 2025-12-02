@@ -44,6 +44,9 @@ build {
       # Install packages
       "sudo yum install -y httpd php php-mysqlnd php-mbstring php-json php-cli unzip wget stress-ng tar",
 
+      #set env variable 
+      "echo 'export CDN_URL=\"https://assets.enpm818n-ecomm-app.xyz\"' | sudo tee -a /etc/profile.d/cdn_url.sh",
+
       # Copy application
       "sudo mkdir -p /var/www/html",
       "sudo cp -r /home/ec2-user/app/* /var/www/html",
