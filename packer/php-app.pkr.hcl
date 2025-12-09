@@ -13,6 +13,7 @@ source "amazon-ebs" "php" {
   ssh_username  = "ec2-user"
 
   ami_name = "php-app-{{timestamp}}"
+  iam_instance_profile = "enpm818n-ec2-profile"
 
   source_ami_filter {
     filters = {
@@ -42,10 +43,26 @@ build {
 
 
       # Install packages
-      "sudo yum install -y httpd php php-mysqlnd php-mbstring php-json php-cli unzip wget stress-ng tar",
+      "sudo amazon-linux-extras enable php8.0",
+      "sudo yum clean metadata",
+      "sudo yum install -y httpd php php-mysqlnd php-mbstring php-json php-cli mysql unzip wget stress-ng tar jq",
 
-      #set env variable 
-      "echo 'export CDN_URL=\"https://assets.enpm818n-ecomm-app.xyz\"' | sudo tee -a /etc/profile.d/cdn_url.sh",
+       # Fetch RDS secret from Secrets Manager
+      "SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id enpm818n-rds-credentials --region us-east-1 --query 'SecretString' --output text)",
+      "DB_HOST=$(echo $SECRET_JSON | jq -r .host)",
+      "DB_USER=$(echo $SECRET_JSON | jq -r .username)",
+      "DB_PASSWORD=$(echo $SECRET_JSON | jq -r .password)",
+      "DB_NAME=$(echo $SECRET_JSON | jq -r .dbname)",
+      "DB_PORT=$(echo $SECRET_JSON | jq -r .port)",
+
+
+      # Set environment variables for PHP via Apache
+      "echo 'SetEnv CDN_URL https://assets.enpm818n-ecomm-app.xyz/' | sudo tee /etc/httpd/conf.d/app-env.conf",
+      "echo \"SetEnv DB_HOST $DB_HOST\" | sudo tee -a /etc/httpd/conf.d/app-env.conf",
+      "echo \"SetEnv DB_USER $DB_USER\" | sudo tee -a /etc/httpd/conf.d/app-env.conf",
+      "echo \"SetEnv DB_PASSWORD $DB_PASSWORD\" | sudo tee -a /etc/httpd/conf.d/app-env.conf",
+      "echo \"SetEnv DB_NAME $DB_NAME\" | sudo tee -a /etc/httpd/conf.d/app-env.conf",
+      "echo \"SetEnv DB_PORT $DB_PORT\" | sudo tee -a /etc/httpd/conf.d/app-env.conf",
 
       # Copy application
       "sudo mkdir -p /var/www/html",
