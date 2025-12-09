@@ -81,7 +81,7 @@ variable "cloudfront_price_class" {
 variable "cloudfront_aliases" {
   description = "Optional domain names (CNAMEs) for CloudFront"
   type        = list(string)
-  default     = ["assests.enpm818n-ecomm-app.xyz"]
+  default     = ["assets.enpm818n-ecomm-app.xyz"]
 }
 
 
