@@ -1,5 +1,5 @@
 <?php 
-$host = getenv('DB_HOST') ?: 'db';  // 'db' MySQL container name in docker-compose
+$host = getenv('DB_HOST') ?: 'db';
 $user = getenv('DB_USER') ?: 'root';
 $pass = getenv('DB_PASSWORD') ?: '';
 $db   = getenv('DB_NAME') ?: 'ecommerce_1';
