@@ -1,0 +1,200 @@
+---
+Metadata:
+  AWSToolsMetrics:
+    IaC_Generator: "arn:aws:cloudformation:us-east-1:245838289780:generatedTemplate/5c40828f-92d5-49e9-ba70-081cf99e14fe"
+Resources:
+  CloudWatchAlarmEnpm818ncpuscalein:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::CloudWatch::Alarm"
+    DeletionPolicy: "Retain"
+    Properties:
+      ComparisonOperator: "LessThanThreshold"
+      TreatMissingData: "missing"
+      Dimensions:
+      - Value: "enpm818n-asg"
+        Name: "AutoScalingGroupName"
+      Period: 60
+      EvaluationPeriods: 2
+      Namespace: "AWS/EC2"
+      OKActions: []
+      AlarmActions:
+      - "arn:aws:autoscaling:us-east-1:245838289780:scalingPolicy:1332456f-81ed-4eed-9960-5d38562c77c0:autoScalingGroupName/enpm818n-asg:policyName/enpm818n-cpu-scalein-policy"
+      - "arn:aws:sns:us-east-1:245838289780:enpm818n-alerts"
+      MetricName: "CPUUtilization"
+      ActionsEnabled: true
+      AlarmName: "enpm818n-cpu-scalein"
+      Statistic: "Average"
+      InsufficientDataActions: []
+      DatapointsToAlarm: 2
+      Tags:
+      - Value: "enpm818n-cpu-scalein"
+        Key: "Name"
+      Threshold: 40
+  CloudWatchAlarmEnpm818nerrorrateshigh:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::CloudWatch::Alarm"
+    DeletionPolicy: "Retain"
+    Properties:
+      ComparisonOperator: "GreaterThanThreshold"
+      TreatMissingData: "missing"
+      EvaluationPeriods: 1
+      OKActions: []
+      AlarmActions:
+      - "arn:aws:sns:us-east-1:245838289780:enpm818n-alerts"
+      ActionsEnabled: true
+      Metrics:
+      - Label: "5XX Error Rate%"
+        Id: "e1"
+        ReturnData: true
+        Expression: "100*(m1/m2)"
+      - ReturnData: false
+        MetricStat:
+          Period: 300
+          Metric:
+            MetricName: "HTTPCode_Target_5XX_Count"
+            Dimensions:
+            - Value: "targetgroup/enpm818n-tg/60ab4ae0f907dd93"
+              Name: "TargetGroup"
+            - Value: "app/enpm818n-alb/0bce66401e4ff05b"
+              Name: "LoadBalancer"
+            Namespace: "AWS/ApplicationELB"
+          Stat: "Sum"
+        Id: "m1"
+      - ReturnData: false
+        MetricStat:
+          Period: 300
+          Metric:
+            MetricName: "RequestCount"
+            Dimensions:
+            - Value: "targetgroup/enpm818n-tg/60ab4ae0f907dd93"
+              Name: "TargetGroup"
+            - Value: "app/enpm818n-alb/0bce66401e4ff05b"
+              Name: "LoadBalancer"
+            Namespace: "AWS/ApplicationELB"
+          Stat: "Sum"
+        Id: "m2"
+      AlarmDescription: "Triggers when ALB Target Group 5XX errors exceed 1 per 5\
+        \ minutes.\n"
+      AlarmName: "enpm818n-errorrates-high"
+      InsufficientDataActions: []
+      DatapointsToAlarm: 1
+      Tags:
+      - Value: "enpm818n-errorrates-high   "
+        Key: "Name"
+      Threshold: 1
+  CloudWatchAlarmEnpm818ncpuscaleout:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::CloudWatch::Alarm"
+    DeletionPolicy: "Retain"
+    Properties:
+      ComparisonOperator: "GreaterThanThreshold"
+      TreatMissingData: "missing"
+      Dimensions:
+      - Value: "enpm818n-asg"
+        Name: "AutoScalingGroupName"
+      Period: 60
+      EvaluationPeriods: 2
+      Namespace: "AWS/EC2"
+      OKActions: []
+      AlarmActions:
+      - "arn:aws:sns:us-east-1:245838289780:enpm818n-alerts"
+      - "arn:aws:autoscaling:us-east-1:245838289780:scalingPolicy:13b1858d-b0b2-45e8-b0d8-3d6556bbe5eb:autoScalingGroupName/enpm818n-asg:policyName/enpm818n-cpu-scaleout-policy"
+      MetricName: "CPUUtilization"
+      ActionsEnabled: true
+      AlarmName: "enpm818n-cpu-scaleout"
+      Statistic: "Average"
+      InsufficientDataActions: []
+      DatapointsToAlarm: 2
+      Tags:
+      - Value: "enpm818n-cpu-scaleout"
+        Key: "Name"
+      Threshold: 70
+  CloudTrailTrailEcommaudittrail:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::CloudTrail::Trail"
+    DeletionPolicy: "Retain"
+    Properties:
+      IncludeGlobalServiceEvents: true
+      EventSelectors:
+      - IncludeManagementEvents: true
+        DataResources:
+        - Values:
+          - "arn:aws:s3"
+          Type: "AWS::S3::Object"
+        ReadWriteType: "All"
+        ExcludeManagementEventSources: []
+      AggregationConfigurations: []
+      CloudWatchLogsRoleArn: "arn:aws:iam::245838289780:role/service-role/enpm818n-cloudtrail-to-cwlogs-role"
+      AdvancedEventSelectors: []
+      TrailName: "ecomm-audit-trail"
+      IsOrganizationTrail: false
+      InsightSelectors:
+      - InsightType: "ApiCallRateInsight"
+        EventCategories:
+        - "Management"
+      - InsightType: "ApiErrorRateInsight"
+        EventCategories:
+        - "Management"
+      CloudWatchLogsLogGroupArn: "arn:aws:logs:us-east-1:245838289780:log-group:/aws/cloudtrail/enpm818n-cloudtrail-logs:*"
+      IsMultiRegionTrail: true
+      S3BucketName: "aws-cloudtrail-logs-245838289780-765c1321"
+      EnableLogFileValidation: false
+      Tags:
+      - Value: "enpm818n-cloudtrail"
+        Key: "Name"
+      IsLogging: true
+  CloudWatchAlarmEnpm818ncustomnetworkoutscaleout:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::CloudWatch::Alarm"
+    DeletionPolicy: "Retain"
+    Properties:
+      ComparisonOperator: "GreaterThanThreshold"
+      TreatMissingData: "missing"
+      Dimensions:
+      - Value: "enpm818n-asg"
+        Name: "AutoScalingGroupName"
+      Period: 60
+      EvaluationPeriods: 1
+      Namespace: "AWS/EC2"
+      OKActions: []
+      AlarmActions:
+      - "arn:aws:autoscaling:us-east-1:245838289780:scalingPolicy:4766147d-8aba-442b-8508-4d2ea05fa6d3:autoScalingGroupName/enpm818n-asg:policyName/enpm818n-networkout-scaleout-policy"
+      - "arn:aws:sns:us-east-1:245838289780:enpm818n-alerts"
+      MetricName: "NetworkOut"
+      ActionsEnabled: true
+      AlarmDescription: "Triggers ASG scale-out when NetworkOut exceeds 5MB for 1\
+        \ minute.\n"
+      AlarmName: "enpm818n-custom-networkout-scaleout"
+      Statistic: "Average"
+      InsufficientDataActions: []
+      DatapointsToAlarm: 1
+      Tags: []
+      Threshold: 5000000
+  CloudWatchAlarmEnpm818nlatencyhigh:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::CloudWatch::Alarm"
+    DeletionPolicy: "Retain"
+    Properties:
+      ComparisonOperator: "GreaterThanThreshold"
+      TreatMissingData: "missing"
+      Dimensions:
+      - Value: "targetgroup/enpm818n-tg/60ab4ae0f907dd93"
+        Name: "TargetGroup"
+      - Value: "app/enpm818n-alb/0bce66401e4ff05b"
+        Name: "LoadBalancer"
+      Period: 60
+      EvaluationPeriods: 2
+      Namespace: "AWS/ApplicationELB"
+      OKActions: []
+      AlarmActions:
+      - "arn:aws:sns:us-east-1:245838289780:enpm818n-alerts"
+      MetricName: "TargetResponseTime"
+      ActionsEnabled: true
+      AlarmName: "enpm818n-latency-high"
+      Statistic: "Average"
+      InsufficientDataActions: []
+      DatapointsToAlarm: 2
+      Tags:
+      - Value: "enpm818n-latency-high"
+        Key: "Name "
+      Threshold: 0.5
