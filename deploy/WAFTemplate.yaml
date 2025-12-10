@@ -1,0 +1,122 @@
+---
+Metadata:
+  AWSToolsMetrics:
+    IaC_Generator: "arn:aws:cloudformation:us-east-1:245838289780:generatedTemplate/23411dc8-7ef2-4da5-9dbc-461801bb4a96"
+Resources:
+  WAFv2WebACLREGIONAL:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::WAFv2::WebACL"
+    DeletionPolicy: "Retain"
+    Properties:
+      Description: "Web ACL for enpm818n ALB to protect e-commerce app"
+      DefaultAction:
+        Allow: {}
+      Scope: "REGIONAL"
+      OnSourceDDoSProtectionConfig:
+        ALBLowReputationMode: "ACTIVE_UNDER_DDOS"
+      Rules:
+      - OverrideAction:
+          None: {}
+        RuleLabels: []
+        VisibilityConfig:
+          SampledRequestsEnabled: true
+          MetricName: "AWS-AWSManagedRulesCommonRuleSet"
+          CloudWatchMetricsEnabled: true
+        Priority: 0
+        Statement:
+          ManagedRuleGroupStatement:
+            ManagedRuleGroupConfigs: []
+            VendorName: "AWS"
+            RuleActionOverrides:
+            - ActionToUse:
+                Count: {}
+              Name: "SizeRestrictions_BODY"
+            ExcludedRules: []
+            Name: "AWSManagedRulesCommonRuleSet"
+        Name: "AWS-AWSManagedRulesCommonRuleSet"
+      - OverrideAction:
+          None: {}
+        RuleLabels: []
+        VisibilityConfig:
+          SampledRequestsEnabled: true
+          MetricName: "AWS-AWSManagedRulesSQLiRuleSet"
+          CloudWatchMetricsEnabled: true
+        Priority: 1
+        Statement:
+          ManagedRuleGroupStatement:
+            ManagedRuleGroupConfigs: []
+            VendorName: "AWS"
+            RuleActionOverrides: []
+            ExcludedRules: []
+            Name: "AWSManagedRulesSQLiRuleSet"
+        Name: "AWS-AWSManagedRulesSQLiRuleSet"
+      - OverrideAction:
+          None: {}
+        RuleLabels: []
+        VisibilityConfig:
+          SampledRequestsEnabled: true
+          MetricName: "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+          CloudWatchMetricsEnabled: true
+        Priority: 2
+        Statement:
+          ManagedRuleGroupStatement:
+            ManagedRuleGroupConfigs: []
+            VendorName: "AWS"
+            RuleActionOverrides: []
+            ExcludedRules: []
+            Name: "AWSManagedRulesKnownBadInputsRuleSet"
+        Name: "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+      - OverrideAction:
+          None: {}
+        RuleLabels: []
+        VisibilityConfig:
+          SampledRequestsEnabled: true
+          MetricName: "AWS-AWSManagedRulesAmazonIpReputationList"
+          CloudWatchMetricsEnabled: true
+        Priority: 3
+        Statement:
+          ManagedRuleGroupStatement:
+            ManagedRuleGroupConfigs: []
+            VendorName: "AWS"
+            RuleActionOverrides: []
+            ExcludedRules: []
+            Name: "AWSManagedRulesAmazonIpReputationList"
+        Name: "AWS-AWSManagedRulesAmazonIpReputationList"
+      - Action:
+          Block: {}
+        RuleLabels: []
+        VisibilityConfig:
+          SampledRequestsEnabled: true
+          MetricName: "enpm818n-custom-block-xss"
+          CloudWatchMetricsEnabled: true
+        Priority: 4
+        Statement:
+          ByteMatchStatement:
+            SearchStringBase64: "PHNjcmlwdA=="
+            TextTransformations:
+            - Type: "URL_DECODE"
+              Priority: 0
+            - Type: "LOWERCASE"
+              Priority: 1
+            PositionalConstraint: "CONTAINS"
+            SearchString: "<script"
+            FieldToMatch:
+              QueryString: {}
+        Name: "enpm818n-custom-block-xss"
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        MetricName: "enpm818n-waf-alb"
+        CloudWatchMetricsEnabled: true
+      Name: "enpm818n-waf-alb"
+  WAFv2LoggingConfigurationRegionalwebaclenpm818nwafalbd1198975fba04f27abd29e331b274719:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::WAFv2::LoggingConfiguration"
+    DeletionPolicy: "Retain"
+    Properties:
+      RedactedFields: []
+      ResourceArn:
+        Fn::GetAtt:
+        - "WAFv2WebACLREGIONAL"
+        - "Arn"
+      LogDestinationConfigs:
+      - "arn:aws:logs:us-east-1:245838289780:log-group:aws-waf-logs-enpm818n-waf-alb"
